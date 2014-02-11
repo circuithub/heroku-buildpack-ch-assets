@@ -14,9 +14,13 @@ function indent() {
   esac
 }
 
+# Add node executable to path
+export PATH=$CACHE_DIR/node/bin:$PATH
+
 echo "----- Publish CircuitHub static assets"
 cd $BUILD_DIR
 ls run_cake.js
 $CACHE_DIR/node/bin/node $BUILD_DIR/run_cake.js publish.assets
+node_modules/.bin/grunt heroku:$NODE_ENV --force
 cd ..
 echo "Assets published" | indent
