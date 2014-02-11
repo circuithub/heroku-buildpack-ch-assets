@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
+
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+echo "----- Publish CircuitHub static assets"
+cd $BUILD_DIR
+ls run_cake.js
+$CACHE_DIR/node/bin/node $BUILD_DIR/run_cake.js publish.assets
+cd ..
+echo "Assets published" | indent
