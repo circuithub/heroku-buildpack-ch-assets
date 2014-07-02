@@ -14,12 +14,10 @@ function indent() {
   esac
 }
 
-# Add node executable to path
+# Add executables to path
 export PATH=$CACHE_DIR/node/bin:$PATH
 
 echo "----- Publish CircuitHub static assets"
 cd $BUILD_DIR
-$BUILD_DIR/node_modules/.bin/gulp publish-assets
-cp -R $BUILD_DIR/dist $CACHE_DIR
-cd ..
+$CACHE_DIR/node/bin/node --harmony $BUILD_DIR/node_modules/gulp/bin/gulp.js publish-assets
 echo "Assets published" | indent
