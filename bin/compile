@@ -20,5 +20,6 @@ export PATH=$CACHE_DIR/node/bin:$PATH
 echo "----- Publish CircuitHub static assets"
 cd $BUILD_DIR
 $BUILD_DIR/node_modules/.bin/gulp publish-assets
+cp -R $BUILD_DIR/dist $CACHE_DIR
 cd ..
 echo "Assets published" | indent
