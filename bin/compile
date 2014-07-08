@@ -7,6 +7,13 @@ cache_dir=$2
 env_dir=$3
 lp_dir=`cd $(dirname $0); cd ..; pwd`
 
+die() {
+  if [ -n "${*:+_}" ]; then
+    log_error "$@"
+  fi
+  exit 1
+}
+
 indent() {
   c='s/^/       /'
   case $(uname) in
@@ -40,13 +47,13 @@ export_env_dir() {
 
   echo "----- Publish CircuitHub static assets"
   cd $build_dir
-  $cache_dir/node/bin/node --harmony $build_dir/node_modules/gulp/bin/gulp.js publish-assets
+  $cache_dir/node/bin/node --harmony $build_dir/node_modules/gulp/bin/gulp.js publish-assets || die
   echo "Assets published" | indent
 )
 
 echo "----- Delete extraneous tools"
-rm -rf $build_dir/node_modules/gulp
-rm -rf $build_dir/node_modules/gulp-*
-rm -rf $build_dir/node_modules/xmlbuilder
-rm -rf $build_dir/node_modules/xml2js
+rm -rf $build_dir/node_modules/gulp       || die
+rm -rf $build_dir/node_modules/gulp-*     || die
+rm -rf $build_dir/node_modules/xmlbuilder || die
+rm -rf $build_dir/node_modules/xml2js     || die
 echo "Deleted extraneous tools" | indent
