@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir>
+# bin/compile <build-dir> <cache-dir> <env-dir>
 
-BUILD_DIR=$1
-CACHE_DIR=$2
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
+# Configure directories
+build_dir=$1
+cache_dir=$2
+env_dir=$3
+lp_dir=`cd $(dirname $0); cd ..; pwd`
 
-
-function indent() {
+indent() {
   c='s/^/       /'
   case $(uname) in
     Darwin) sed -l "$c";;
@@ -14,17 +15,38 @@ function indent() {
   esac
 }
 
-# Add executables to path
-export PATH=$CACHE_DIR/node/bin:$PATH
+export_env_dir() {
+  env_dir=$1
+  whitelist_regex=${2:-''}
+  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
 
-echo "----- Publish CircuitHub static assets"
-cd $BUILD_DIR
-$CACHE_DIR/node/bin/node --harmony $BUILD_DIR/node_modules/gulp/bin/gulp.js publish-assets
-echo "Assets published" | indent
+(
+  # Scope config var availability only to `gulp`
+  if [ -d "$env_dir" ]; then
+    echo "----- Exporting config vars to environment"
+    export_env_dir $env_dir
+  fi
+
+  # Add executables to path
+  export PATH=$cache_dir/node/bin:$PATH
+
+  echo "----- Publish CircuitHub static assets"
+  cd $build_dir
+  $cache_dir/node/bin/node --harmony $build_dir/node_modules/gulp/bin/gulp.js publish-assets
+  echo "Assets published" | indent
+)
 
 echo "----- Delete extraneous tools"
-rm -rf $BUILD_DIR/node_modules/gulp
-rm -rf $BUILD_DIR/node_modules/gulp-*
-rm -rf $BUILD_DIR/node_modules/xmlbuilder
-rm -rf $BUILD_DIR/node_modules/xml2js
+rm -rf $build_dir/node_modules/gulp
+rm -rf $build_dir/node_modules/gulp-*
+rm -rf $build_dir/node_modules/xmlbuilder
+rm -rf $build_dir/node_modules/xml2js
 echo "Deleted extraneous tools" | indent
